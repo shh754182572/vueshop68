@@ -41,8 +41,8 @@ export default {
             return this.$message.error(dt.meta.msg)
           }
 
-          window.sessionStorage.setItem('token',dt.data.token)
-            this.$router.push('/home')
+          window.sessionStorage.setItem('token', dt.data.token)
+          this.$router.push('/home')
         }
       })
     },
