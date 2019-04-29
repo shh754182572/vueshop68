@@ -1,6 +1,6 @@
 <template>
   <div>
-    <com-crumb nm="权限"/>
+    <com-crumb nm="权限管理" xnm="权限列表"/>
 
     <el-card class="box-card">
       <el-table :data="rightsList" border stripe style="width: 100%">

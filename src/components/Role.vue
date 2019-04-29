@@ -1,6 +1,6 @@
 <template>
   <div>
-    <com-crumb nm="权限" xnm="角色"/>
+    <com-crumb nm="权限管理" xnm="角色列表"/>
 
     <el-dialog title="分配权限" :visible.sync="roleDialog" width="50%">
       <el-form ref="form" :model="roleForm" label-width="120px">

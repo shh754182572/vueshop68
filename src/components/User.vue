@@ -1,6 +1,6 @@
 <template>
   <div>
-    <com-crumb nm="用户"/>
+    <com-crumb nm="用户管理" xnm="用户列表"/>
 
     <el-dialog
       @close="$refs.setRoleRef.resetFields()"
