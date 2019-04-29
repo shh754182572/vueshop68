@@ -1,10 +1,33 @@
 <template>
   <div>
-    <el-breadcrumb separator-class="el-icon-arrow-right">
-      <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>用户管理</el-breadcrumb-item>
-      <el-breadcrumb-item>用户列表</el-breadcrumb-item>
-    </el-breadcrumb>
+    <com-crumb nm="用户"/>
+
+    <el-dialog
+      @close="$refs.setRoleRef.resetFields()"
+      title="角色分配"
+      :visible.sync="setRoleDialog"
+      width="50%"
+    >
+      <el-form :model="setRole" :rules="setRoleRules" ref="setRoleRef" label-width="120px">
+        <el-form-item label="当前户名" prop="username">{{setRole.username}}</el-form-item>
+        <el-form-item label="目前角色" prop="role_name">{{setRole.role_name}}</el-form-item>
+        <el-form-item label="分配新角色" prop="rid">
+          <el-select v-model="setRole.rid" placeholder="请选择">
+            <el-option
+              v-for="item in roleList"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="setRoleDialog= false">取 消</el-button>
+        <el-button type="primary" @click="fenRole()">确 定</el-button>
+      </span>
+    </el-dialog>
 
     <el-dialog
       @close="$refs.addFormRef.resetFields()"
@@ -42,7 +65,7 @@
       >
         <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="80px">
           <el-form-item label="用户名" prop="username">
-            <el-input v-model="editForm.username"></el-input>
+            <el-input v-model="editForm.username" disabled></el-input>
           </el-form-item>
           <el-form-item label="邮箱" prop="email">
             <el-input v-model="editForm.email"></el-input>
@@ -84,7 +107,11 @@
         <el-table-column prop="email" label="邮箱" width="150"></el-table-column>
 
         <el-table-column prop="mg_state" label="状态" width="60">
-          <el-switch v-model="info.row.mg_state" slot-scope="info"></el-switch>
+          <el-switch
+            v-model="info.row.mg_state"
+            slot-scope="info"
+            @change="stateChange(info.row,info.row.mg_state)"
+          ></el-switch>
         </el-table-column>
 
         <el-table-column label="操作" width="270">
@@ -108,7 +135,12 @@
               placement="top"
               :enterable="false"
             >
-              <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+              <el-button
+                type="warning"
+                icon="el-icon-setting"
+                size="mini"
+                @click="showSetRoleDialog(info.row)"
+              ></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -134,6 +166,54 @@ export default {
   },
 
   methods: {
+    // 设置用户状态
+    async stateChange(user, state) {
+      const { data: dt } = await this.$http.put(
+        `users/${user.id}/state/${state}`
+      )
+      // console.log(dt)
+      if (dt.meta.status !== 200) {
+        return this.$message.error(dt.meta.msg)
+      }
+      this.$message.success(dt.meta.msg)
+    },
+
+    // 给用户分配新角色
+    fenRole() {
+      this.$refs.setRoleRef.validate(async valid => {
+        if (valid) {
+          const { data: dt } = await this.$http.put(
+            `users/${this.setRole.id}/role`,
+            {
+              rid: this.setRole.rid
+            }
+          )
+          // console.log(dt)
+          if (dt.meta.status !== 200) {
+            return this.$message.error(dt.meta.msg)
+          }
+          this.$message.success(dt.meta.msg)
+          this.setRoleDialog = false
+          this.getUserList()
+        }
+      })
+    },
+    // 展示分配角色表单
+    async showSetRoleDialog(userList) {
+      const { data: dt } = await this.$http.get('roles')
+      // console.log(dt)
+      if (dt.meta.status !== 200) {
+        return this.$message.error(dt.meta.msg)
+      }
+      this.roleList = dt.data
+      // console.log(this.roleList)
+
+      this.setRole = userList
+      // console.log(this.setRole)
+      this.setRoleDialog = true
+    },
+
+    // 修改用户信息
     editUser() {
       this.$refs.editFormRef.validate(async valid => {
         const { data: dt } = await this.$http.put(
@@ -149,6 +229,7 @@ export default {
         this.getUserList()
       })
     },
+    // 展示修改用户表单
     async showEditDlalog(id) {
       const { data: dt } = await this.$http.get('users/' + id)
       // console.log(dt)
@@ -158,6 +239,7 @@ export default {
       this.editForm = dt.data
       this.editUserDialog = true
     },
+    // 删除用户
     delUser(id) {
       this.$confirm('确定要删除该用户么？', '删除用户', {
         confirmButtonText: '确定',
@@ -178,6 +260,7 @@ export default {
         .catch(() => {})
     },
 
+    // 添加用户
     addUser() {
       this.$refs.addFormRef.validate(async valid => {
         if (valid) {
@@ -193,14 +276,17 @@ export default {
       })
     },
 
+    // 每页条数变化
     handleSizeChange(val) {
       this.querycdt.pagesize = val
       this.getUserList()
     },
+    // 每页页码变化
     handleCurrentChange(val) {
       this.querycdt.pagenum = val
       this.getUserList()
     },
+    // 获取用户数据
     async getUserList() {
       const { data: dt } = await this.$http.get('users', {
         params: this.querycdt
@@ -215,6 +301,7 @@ export default {
   },
 
   data() {
+    // 手机自定义验证
     var checkMobile = (rule, value, callback) => {
       if (!/^1[135789]\d{9}$/.test(value)) {
         return callback(new Error('手机号码格式不正确'))
@@ -223,7 +310,22 @@ export default {
     }
 
     return {
+      // 角色分配自然验证
+      setRoleRules: {
+        rid: [
+          { required: true, message: '必须选取一个角色', trigger: 'change' }
+        ]
+      },
+      roleList: [],
+      setRoleDialog: false,
+      setRole: {
+        username: '',
+        role_name: '',
+        rid: ''
+      },
+
       editUserDialog: false,
+      // 修改用户自然验证
       editFormRules: {
         mobile: [
           { required: true, message: '手机号码不能为空', trigger: 'blur' },
@@ -244,6 +346,7 @@ export default {
         email: '',
         mobile: ''
       },
+      // 添加用户自然验证
       addFormRules: {
         username: [
           { required: true, message: '请输入用户名', trigger: 'blur' }
