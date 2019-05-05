@@ -29,6 +29,11 @@
     <el-card class="box-card">
       <el-button type="primary" @click="showaddCatDialog()">添加分类</el-button>
       <el-table :data="catList" border stripe style="width: 100%" row-key="cat_id">
+        <el-table-column label="序号" type="index" width="200px" >
+          <template slot-scope="info">
+            <el-col v-if="info.row.cat_level===0">★</el-col>
+          </template>
+        </el-table-column>
         <el-table-column prop="cat_name" label="分类名称" width="200"></el-table-column>
         <el-table-column prop="cat_pid" label="是否有效" width="200">
           <i class="el-icon-success" style="color:rgb(68,178,170)"></i>
@@ -50,9 +55,8 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="querycdt.pagenum"
-        :page-sizes="[5, 10, 15, 20]"
         :page-size="querycdt.pagesize"
-        layout="total, sizes, prev, pager, next, jumper"
+        layout="total, prev, pager, next, jumper"
         :total="tot"
       ></el-pagination>
     </el-card>
@@ -105,7 +109,7 @@ export default {
         this.addCat.cat_pid = this.catTwoSelected[len - 1]
         this.addCat.cat_level = len
       }
-      console.log(this.addCat)
+      // console.log(this.addCat)
     },
 
     async showaddCatDialog() {
@@ -117,7 +121,7 @@ export default {
         return this.$message.error(dt.meta.msg)
       }
       this.catTwoList = dt.data
-      console.log(this.catTwoList)
+      // console.log(this.catTwoList)
 
       this.addCatDialog = true
     },
@@ -127,12 +131,14 @@ export default {
       const { data: dt } = await this.$http.get('categories', {
         params: this.querycdt
       })
-      //   console.log(dt)
+      // console.log(dt)
       if (dt.meta.status !== 200) {
         return this.$message.error(dt.meta.msg)
       }
       this.catList = dt.data.result
       this.tot = dt.data.total
+      // this.length = dt.data.result.length
+      // console.log(this.length)
     }
   },
   data() {
@@ -154,6 +160,7 @@ export default {
         cat_level: 0
       },
 
+      length: 0,
       tot: 0,
       catList: [],
       querycdt: {

@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import moment from 'moment'
 
 import './assets/css/global.css'
 
@@ -28,6 +29,10 @@ axios.interceptors.request.use(
 )
 
 Vue.prototype.$http = axios
+
+Vue.filter('dateFormat', v => {
+  return moment(v).format('YYYY-MM-DD')
+})
 
 /* eslint-disable no-new */
 new Vue({
