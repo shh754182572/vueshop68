@@ -4,7 +4,7 @@ body,
   height: 100%;
   margin: 0;
   padding: 0;
-  min-width:1024px;
+  min-width: 1024px;
 }
 .el-submenu__title,
 .el-menu-item {
@@ -24,3 +24,9 @@ i.iconfont {
   margin-top: 15px;
   font-size: 12px;
 }
+
+.ql-editor {
+  height: 200px;
+}
+
+

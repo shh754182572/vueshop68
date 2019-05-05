@@ -49,7 +49,7 @@
         <el-table-column prop="goods_name" label="商品名称"></el-table-column>
         <el-table-column prop="goods_price" label="商品价格" width="80"></el-table-column>
         <el-table-column prop="goods_weight" label="商品重量" width="100"></el-table-column>
-        <el-table-column label="创建时间" width="100">
+        <el-table-column label="创建时间" width="150">
           <template slot-scope="info">
             <span>{{info.row.add_time |dateFormat}}</span>
           </template>
@@ -130,7 +130,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       })
-        .then(async () => {
+        .then(async() => {
           const { data: dt } = await this.$http.delete('goods/' + goodsId)
           //   console.log(dt)
           if (dt.meta.status !== 200) {

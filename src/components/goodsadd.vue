@@ -168,7 +168,7 @@ export default {
         this.manyList = dt.data
       }
 
-      //请求静态参数
+      // 请求静态参数
       if (this.activeName === '3') {
         const { data: dt } = await this.$http.get(
           `categories/${this.threeCatId}/attributes`,
@@ -255,8 +255,5 @@ export default {
 <style lang="less" scoped>
 .el-step {
   margin: 15px;
-}
-.ql-editor {
-  height: 200px !important;
 }
 </style>

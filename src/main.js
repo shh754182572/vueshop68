@@ -31,7 +31,7 @@ axios.interceptors.request.use(
 Vue.prototype.$http = axios
 
 Vue.filter('dateFormat', v => {
-  return moment(v).format('YYYY-MM-DD')
+  return moment(v).format('YYYY-MM-DD HH:mm:ss')
 })
 
 /* eslint-disable no-new */
