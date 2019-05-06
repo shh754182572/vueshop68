@@ -1,22 +1,22 @@
 import Vue from 'vue'
-import Router from 'vue-router'
+import VueRouter from 'vue-router'
 
-import Login from '@/components/Login'
-import Home from '@/components/Home'
-import Welcome from '@/components/Welcome'
-import User from '@/components/User'
-import Right from '@/components/Right'
-import Role from '@/components/Role'
-import Cat from '@/components/Cat'
-import Param from '@/components/Param'
-import Goods from '@/components/Goods'
-import goodsadd from '@/components/goodsadd'
-import Order from '@/components/Order'
-import Report from '@/components/Report'
+const Login = () => import('@/components/Login')
+const Home = () => import('@/components/Home')
+const Welcome = () => import('@/components/Welcome')
+const User = () => import('@/components/User')
+const Right = () => import('@/components/Right')
+const Role = () => import('@/components/Role')
+const Cat = () => import('@/components/Cat')
+const Param = () => import('@/components/Param')
+const Goods = () => import('@/components/Goods')
+const goodsadd = () => import('@/components/goodsadd')
+const Order = () => import('@/components/Order')
+const Report = () => import('@/components/Report')
 
-Vue.use(Router)
+Vue.use(VueRouter)
 
-const router = new Router({
+const router = new VueRouter({
   routes: [
     { path: '/', redirect: '/home' },
     { path: '/login', component: Login },

@@ -12,8 +12,8 @@ import comCrumb from './components/Share/Crumb.vue'
 
 import './assets/fonts/iconfont.css'
 
-import ElementUI from 'element-ui'
-Vue.use(ElementUI)
+import ELEMENT from 'element-ui'
+Vue.use(ELEMENT)
 
 Vue.component('com-crumb', comCrumb)
 
