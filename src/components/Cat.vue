@@ -30,9 +30,9 @@
       <el-button type="primary" @click="showaddCatDialog()">添加分类</el-button>
       <el-table :data="catList" border stripe style="width: 100%" row-key="cat_id">
         <el-table-column label="序号" type="index" width="200px" >
-          <template slot-scope="info">
+          <!-- <template slot-scope="info">
             <el-col v-if="info.row.cat_level===0">★</el-col>
-          </template>
+          </template> -->
         </el-table-column>
         <el-table-column prop="cat_name" label="分类名称" width="200"></el-table-column>
         <el-table-column prop="cat_pid" label="是否有效" width="200">
