@@ -58,8 +58,8 @@ export default {
         password: [{ required: true, message: '密码必填', trigger: 'blur' }]
       },
       loginForm: {
-        username: '',
-        password: ''
+        username: 'admin',
+        password: '123456'
       }
     }
   }
