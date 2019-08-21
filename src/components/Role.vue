@@ -1,6 +1,48 @@
 <template>
   <div>
-    <com-crumb nm="权限管理" xnm="角色列表"/>
+    <com-crumb nm="权限管理" xnm="角色列表" />
+
+    <el-dialog
+      @close="$refs.addFormRef.resetFields()"
+      title="添加用户"
+      :visible.sync="addRoleDialog"
+      width="50%"
+    >
+      <el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="80px">
+        <el-form-item label="角色名称" prop="roleName">
+          <el-input v-model="addForm.roleName"></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述" prop="roleDesc">
+          <el-input v-model="addForm.roleDesc"></el-input>
+        </el-form-item>
+      </el-form>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="addRoleDialog= false">取 消</el-button>
+        <el-button type="primary" @click="addRole()">确 定</el-button>
+      </span>
+    </el-dialog>
+
+    <el-dialog
+      @close="$refs.editFormRef.resetFields()"
+      title="修改角色"
+      :visible.sync="editRoleDialog"
+      width="50%"
+    >
+      <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="80px">
+        <el-form-item label="角色名称" prop="roleName">
+          <el-input v-model="editForm.roleName"></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述" prop="roleDesc">
+          <el-input v-model="editForm.roleDesc"></el-input>
+        </el-form-item>
+      </el-form>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="editRoleDialog = false">取 消</el-button>
+        <el-button type="primary" @click="editRole()">确 定</el-button>
+      </span>
+    </el-dialog>
 
     <el-dialog title="分配权限" :visible.sync="roleDialog" width="50%">
       <el-form ref="form" :model="roleForm" label-width="120px">
@@ -24,7 +66,7 @@
     </el-dialog>
 
     <el-card class="box-card">
-      <el-button type="primary">添加角色</el-button>
+      <el-button type="primary"  @click="addRoleDialog = true">添加角色</el-button>
       <el-table :data="rolesList" border stripe style="width: 100%">
         <el-table-column type="expand" width="60">
           <template slot-scope="info">
@@ -68,10 +110,22 @@
         <el-table-column type="index" label="序号" width="80"></el-table-column>
         <el-table-column prop="roleName" label="角色名称"></el-table-column>
         <el-table-column prop="roleDesc" label="角色描述" width="340"></el-table-column>
+
         <el-table-column label="操作" width="340">
           <template slot-scope="info">
-            <el-button type="primary" icon="el-icon-edit" size="mini">编辑</el-button>
-            <el-button type="danger" icon="el-icon-delete" size="mini">删除</el-button>
+            <el-button
+              type="primary"
+              icon="el-icon-edit"
+              size="mini"
+              @click="showEditDlalog(info.row.id)"
+            >编辑</el-button>
+
+            <el-button
+              type="danger"
+              icon="el-icon-delete"
+              size="mini"
+              @click="delRole(info.row.id)"
+            >删除</el-button>
             <el-button
               type="warning"
               icon="el-icon-setting"
@@ -110,6 +164,66 @@ export default {
       this.$message.success(dt.meta.msg)
       this.getRolesList()
     },
+
+    // 添加角色
+    addRole() {
+      this.$refs.addFormRef.validate(async valid => {
+        if (valid) {
+          const { data: dt } = await this.$http.post('roles/', this.addForm)
+          // console.log(res)
+          if (dt.meta.status !== 201) {
+            return this.$message.error(dt.meta.msg)
+          }
+          this.addRoleDialog = false
+          this.$message.success(dt.meta.msg)
+          this.getRolesList()
+        }
+      })
+    },
+    // 修改角色信息
+    editRole() {
+      this.$refs.editFormRef.validate(async valid => {
+        const { data: dt } = await this.$http.put(
+          'roles/' + this.editForm.roleId,
+          this.editForm
+        )
+        console.log(dt)
+        if (dt.meta.status !== 200) {
+          return this.$message.error(dt.meta.msg)
+        }
+        this.$message.success(dt.meta.msg)
+        this.editRoleDialog = false
+        this.getRolesList()
+      })
+    },
+    //展示修改角色表单
+    async showEditDlalog(id) {
+      const { data: dt } = await this.$http.get('roles/' + id)
+      console.log(dt)
+      if (dt.meta.status !== 200) {
+        return this.$message.error(dt.meta.msg)
+      }
+      this.editForm = dt.data
+      this.editRoleDialog = true
+    },
+    // 删除角色
+    delRole(id) {
+      this.$confirm('确定要删除该角色么？', '删除角色', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(async () => {
+          const { data: dt } = await this.$http.delete('roles/' + id)
+          if (dt.meta.status !== 200) {
+            return this.$message.error(dt.meta.mag)
+          }
+          this.$message.success(dt.meta.msg)
+
+          this.getRolesList()
+        })
+        .catch(() => {})
+    },
     // 展示分配角色对话框
     async showRoleDialog(role) {
       const { data: dt } = await this.$http.get('rights/tree')
@@ -146,7 +260,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       })
-        .then(async() => {
+        .then(async () => {
           const { data: dt } = await this.$http.delete(
             `roles/${role.id}/rights/${rightId}`
           )
@@ -181,11 +295,34 @@ export default {
         children: 'children'
       },
       rightsInfo: [],
-      roleForm: {
+      // 添加角色自然验证
+      addFormRules: {
+        roleName: [
+          { required: true, message: '请输入角色名称', trigger: 'blur' }
+        ]
+      },
+      // 修改用户自然验证
+      editFormRules: {
+        roleName: [
+          { required: true, message: '请输入角色名称', trigger: 'blur' }
+        ]
+      },
+      addForm: {
+        roleName: '',
+        roleDesc: ''
+      },
+      editForm: {
         id: '',
         roleName: '',
         roleDesc: ''
       },
+      roleForm: {
+        roleId: '',
+        roleName: '',
+        roleDesc: ''
+      },
+      addRoleDialog: false,
+      editRoleDialog : false,
       roleDialog: false,
       rolesList: []
     }
